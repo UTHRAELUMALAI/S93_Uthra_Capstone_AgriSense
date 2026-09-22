@@ -80,3 +80,10 @@ AgriSense/
 ├── data/
 │   └── crop_prices.csv
 └── ml-model/
+## Mock UX Design
+
+Figma Link:
+PASTE_YOUR_FIGMA_LINK_HERE
+
+This mock UX demonstrates the AgriSense application's primary
+screens, navigation flow, and major user journeys.
