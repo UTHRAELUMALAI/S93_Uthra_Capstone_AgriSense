@@ -40,6 +40,17 @@ app.get("/api/crop-prices", async (req, res) => {
     });
   }
 });
+app.post("/api/crop-prices", async (req, res) => {
+  try {
+    const cropPrice = await CropPrice.create(req.body);
+    res.status(201).json(cropPrice);
+  } catch (error) {
+    console.error("Failed to create crop price:", error);
+    res.status(500).json({
+      message: "Failed to create crop price",
+    });
+  }
+});
 
 mongoose
   .connect(process.env.MONGODB_URI)
