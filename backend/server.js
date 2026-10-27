@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-require("dotenv").config();
+require("dotenv").config({ path: __dirname + "/.env" });
 
 const CropPrice = require("./models/CropPrice");
 
@@ -14,18 +14,7 @@ app.get("/", (req, res) => {
   });
 });
 
-// WRITE - Add crop price
-app.post("/api/crop-prices", async (req, res) => {
-  try {
-    const cropPrice = await CropPrice.create(req.body);
 
-    res.status(201).json(cropPrice);
-  } catch (error) {
-    res.status(400).json({
-      message: error.message,
-    });
-  }
-});
 
 // READ - Get all crop prices
 app.get("/api/crop-prices", async (req, res) => {
@@ -71,6 +60,28 @@ app.put("/api/crop-prices/:id", async (req, res) => {
     console.error("Failed to update crop price:", error);
     res.status(500).json({
       message: "Failed to update crop price",
+    });
+  }
+});
+
+app.delete("/api/crop-prices/:id", async (req, res) => {
+  try {
+    const deletedCropPrice = await CropPrice.findByIdAndDelete(req.params.id);
+
+    if (!deletedCropPrice) {
+      return res.status(404).json({
+        message: "Crop price not found",
+      });
+    }
+
+    res.json({
+      message: "Crop price deleted successfully",
+      deletedCropPrice,
+    });
+  } catch (error) {
+    console.error("Failed to delete crop price:", error);
+    res.status(500).json({
+      message: "Failed to delete crop price",
     });
   }
 });

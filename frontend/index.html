@@ -5,84 +5,518 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>AgriSense</title>
+    <title>AgriSense | Market Intelligence</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <h1>AgriSense</h1>
+    <!-- Navigation -->
 
-    <p>Tamil Nadu Multi-Crop Market Intelligence Platform</p>
+    <nav class="navbar">
 
-    <h2>Select Your Crop</h2>
+        <div class="logo">
+            <span class="logo-icon">🌾</span>
+            <span>AgriSense</span>
+        </div>
 
-    <select id="cropSelect">
-        <option value="">Select Crop</option>
-        <option value="Paddy">Paddy</option>
-        <option value="Groundnut">Groundnut</option>
-        <option value="Coconut">Coconut</option>
-        <option value="Banana">Banana</option>
-    </select>
+        <div class="nav-links">
+            <a href="#dashboard">Dashboard</a>
+            <a href="#markets">Market Prices</a>
+            <a href="#comparison-section">Compare Markets</a>
+            <a href="#insights">AI Insights</a>
+        </div>
 
-    <h2>Select Your District</h2>
+        <button class="nav-button" onclick="loadCropPrices()">
+            View Markets
+        </button>
 
-    <select id="districtSelect">
-        <option value="">Select District</option>
-        <option value="Ariyalur">Ariyalur</option>
-        <option value="Chengalpattu">Chengalpattu</option>
-        <option value="Chennai">Chennai</option>
-        <option value="Coimbatore">Coimbatore</option>
-        <option value="Cuddalore">Cuddalore</option>
-        <option value="Dharmapuri">Dharmapuri</option>
-        <option value="Dindigul">Dindigul</option>
-        <option value="Erode">Erode</option>
-        <option value="Kanchipuram">Kanchipuram</option>
-        <option value="Kanyakumari">Kanyakumari</option>
-        <option value="Karur">Karur</option>
-        <option value="Krishnagiri">Krishnagiri</option>
-        <option value="Madurai">Madurai</option>
-        <option value="Mayiladuthurai">Mayiladuthurai</option>
-        <option value="Nagapattinam">Nagapattinam</option>
-        <option value="Namakkal">Namakkal</option>
-        <option value="Nilgiris">Nilgiris</option>
-        <option value="Perambalur">Perambalur</option>
-        <option value="Pudukkottai">Pudukkottai</option>
-        <option value="Ramanathapuram">Ramanathapuram</option>
-        <option value="Ranipet">Ranipet</option>
-        <option value="Salem">Salem</option>
-        <option value="Sivaganga">Sivaganga</option>
-        <option value="Tenkasi">Tenkasi</option>
-        <option value="Thanjavur">Thanjavur</option>
-        <option value="Theni">Theni</option>
-        <option value="Thoothukudi">Thoothukudi</option>
-        <option value="Tiruchirappalli">Tiruchirappalli</option>
-        <option value="Tirunelveli">Tirunelveli</option>
-        <option value="Tirupathur">Tirupathur</option>
-        <option value="Tiruppur">Tiruppur</option>
-        <option value="Tiruvallur">Tiruvallur</option>
-        <option value="Tiruvannamalai">Tiruvannamalai</option>
-        <option value="Tiruvarur">Tiruvarur</option>
-        <option value="Vellore">Vellore</option>
-        <option value="Viluppuram">Viluppuram</option>
-        <option value="Virudhunagar">Virudhunagar</option>
-    </select>
+    </nav>
 
-    <br><br>
 
-    <button onclick="showCrop()">
-        View Market Information
-    </button>
+    <!-- Hero Section -->
 
-    <div id="result"></div>
-    <h2>Crop Price Comparison</h2>
+    <section class="hero">
 
-<button onclick="compareCrops()">
-    Compare All Crops
-</button>
+        <div class="hero-content">
 
-<div id="comparison"></div>
+            <div class="hero-badge">
+                🌱 Tamil Nadu Market Intelligence
+            </div>
+
+            <h1>
+                Know Your Market.<br>
+                <span>Make Better Decisions.</span>
+            </h1>
+
+            <p>
+                Access crop market prices, compare markets,
+                understand price trends, and make informed
+                selling decisions.
+            </p>
+
+            <div class="hero-buttons">
+
+                <button class="primary-button"
+                    onclick="loadCropPrices()">
+                    Explore Market Prices →
+                </button>
+
+                <button class="secondary-button"
+                    onclick="document.getElementById('markets').scrollIntoView({behavior:'smooth'})">
+                    How It Works
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="hero-card">
+
+            <div class="hero-card-top">
+                <span>Current Market</span>
+                <span class="status-dot">● Live View</span>
+            </div>
+
+            <div class="hero-price">
+                ₹2,650
+                <small>/ quintal</small>
+            </div>
+
+            <div class="hero-market">
+                Paddy · Kumbakonam Market
+            </div>
+
+            <div class="trend-up">
+                ↑ Price trend increasing
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Dashboard -->
+
+    <main id="dashboard">
+
+        <section class="section-heading">
+
+            <div>
+                <span class="section-label">MARKET OVERVIEW</span>
+
+                <h2>Market Intelligence Dashboard</h2>
+
+                <p>
+                    Get a quick view of crop prices and market movements.
+                </p>
+            </div>
+
+            <button class="outline-button"
+                onclick="loadCropPrices()">
+                Refresh Data ↻
+            </button>
+
+        </section>
+
+
+        <!-- Statistics -->
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+
+                <div class="stat-icon green">
+                    ₹
+                </div>
+
+                <div>
+                    <p>Current Market Price</p>
+                    <h3>₹2,500</h3>
+                    <span>/ quintal</span>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon blue">
+                    ↑
+                </div>
+
+                <div>
+                    <p>Highest Listed Price</p>
+                    <h3>₹2,650</h3>
+                    <span>Kumbakonam</span>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon orange">
+                    Δ
+                </div>
+
+                <div>
+                    <p>Market Price Difference</p>
+                    <h3>₹150</h3>
+                    <span>per quintal</span>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon purple">
+                    ↗
+                </div>
+
+                <div>
+                    <p>Recent Price Movement</p>
+                    <h3>+4.2%</h3>
+                    <span>Increasing</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Crop Selection -->
+
+        <section id="markets" class="market-section">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="section-label">CROP MARKETS</span>
+
+                    <h2>Explore Market Prices</h2>
+
+                    <p>
+                        Select a crop and district to explore available
+                        market information.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="selection-card">
+
+                <div class="form-group">
+
+                    <label for="cropSelect">
+                        Select Crop
+                    </label>
+
+                    <select id="cropSelect">
+
+                        <option value="">
+                            Select Crop
+                        </option>
+
+                        <option value="Paddy">
+                            Paddy
+                        </option>
+
+                        <option value="Groundnut">
+                            Groundnut
+                        </option>
+
+                        <option value="Coconut">
+                            Coconut
+                        </option>
+
+                        <option value="Banana">
+                            Banana
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="districtSelect">
+                        Select District
+                    </label>
+
+                    <select id="districtSelect">
+
+                        <option value="">
+                            Select District
+                        </option>
+
+                        <option value="Ariyalur">Ariyalur</option>
+                        <option value="Chengalpattu">Chengalpattu</option>
+                        <option value="Chennai">Chennai</option>
+                        <option value="Coimbatore">Coimbatore</option>
+                        <option value="Cuddalore">Cuddalore</option>
+                        <option value="Dharmapuri">Dharmapuri</option>
+                        <option value="Dindigul">Dindigul</option>
+                        <option value="Erode">Erode</option>
+                        <option value="Kanchipuram">Kanchipuram</option>
+                        <option value="Kanyakumari">Kanyakumari</option>
+                        <option value="Karur">Karur</option>
+                        <option value="Krishnagiri">Krishnagiri</option>
+                        <option value="Madurai">Madurai</option>
+                        <option value="Mayiladuthurai">Mayiladuthurai</option>
+                        <option value="Nagapattinam">Nagapattinam</option>
+                        <option value="Namakkal">Namakkal</option>
+                        <option value="Nilgiris">Nilgiris</option>
+                        <option value="Perambalur">Perambalur</option>
+                        <option value="Pudukkottai">Pudukkottai</option>
+                        <option value="Ramanathapuram">Ramanathapuram</option>
+                        <option value="Ranipet">Ranipet</option>
+                        <option value="Salem">Salem</option>
+                        <option value="Sivaganga">Sivaganga</option>
+                        <option value="Tenkasi">Tenkasi</option>
+                        <option value="Thanjavur">Thanjavur</option>
+                        <option value="Theni">Theni</option>
+                        <option value="Thoothukudi">Thoothukudi</option>
+                        <option value="Tiruchirappalli">Tiruchirappalli</option>
+                        <option value="Tirunelveli">Tirunelveli</option>
+                        <option value="Tirupathur">Tirupathur</option>
+                        <option value="Tiruppur">Tiruppur</option>
+                        <option value="Tiruvallur">Tiruvallur</option>
+                        <option value="Tiruvannamalai">Tiruvannamalai</option>
+                        <option value="Tiruvarur">Tiruvarur</option>
+                        <option value="Vellore">Vellore</option>
+                        <option value="Viluppuram">Viluppuram</option>
+                        <option value="Virudhunagar">Virudhunagar</option>
+
+                    </select>
+
+                </div>
+
+
+                <button class="primary-button"
+                    onclick="showCrop()">
+                    View Market Information →
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- Crop Cards -->
+
+        <section class="crop-section">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="section-label">POPULAR CROPS</span>
+
+                    <h2>Market Snapshot</h2>
+
+                    <p>
+                        Sample market prices for major crops.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="crop-grid">
+
+                <div class="crop-card">
+
+                    <div class="crop-symbol">🌾</div>
+
+                    <h3>Paddy</h3>
+
+                    <p>Thanjavur Market</p>
+
+                    <strong>₹2,500</strong>
+
+                    <span>per quintal</span>
+
+                </div>
+
+
+                <div class="crop-card">
+
+                    <div class="crop-symbol">🥜</div>
+
+                    <h3>Groundnut</h3>
+
+                    <p>Chengalpattu Market</p>
+
+                    <strong>₹6,200</strong>
+
+                    <span>per quintal</span>
+
+                </div>
+
+
+                <div class="crop-card">
+
+                    <div class="crop-symbol">🥥</div>
+
+                    <h3>Coconut</h3>
+
+                    <p>Coimbatore Market</p>
+
+                    <strong>₹2,800</strong>
+
+                    <span>per quintal</span>
+
+                </div>
+
+
+                <div class="crop-card">
+
+                    <div class="crop-symbol">🍌</div>
+
+                    <h3>Banana</h3>
+
+                    <p>Theni Market</p>
+
+                    <strong>₹3,500</strong>
+
+                    <span>per quintal</span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Database Records -->
+
+        <section class="records-section">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="section-label">DATABASE RECORDS</span>
+
+                    <h2>Market Price Records</h2>
+
+                    <p>
+                        View, update, and delete crop price records.
+                    </p>
+                </div>
+
+                <button class="primary-button"
+                    onclick="loadCropPrices()">
+                    Load Records
+                </button>
+
+            </div>
+
+
+            <div id="result"></div>
+
+        </section>
+
+
+        <!-- Comparison -->
+
+        <section id="comparison-section"
+            class="comparison-section">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="section-label">MARKET COMPARISON</span>
+
+                    <h2>Compare Crop Prices</h2>
+
+                    <p>
+                        Compare available crop prices across markets.
+                    </p>
+                </div>
+
+                <button class="outline-button"
+                    onclick="compareCrops()">
+                    Compare All Crops
+                </button>
+
+            </div>
+
+
+            <div id="comparison"></div>
+
+        </section>
+
+
+        <!-- AI Insights -->
+
+        <section id="insights" class="insight-section">
+
+            <div class="insight-content">
+
+                <span class="section-label">
+                    AI MARKET INSIGHTS
+                </span>
+
+                <h2>
+                    Turn Market Data Into Better Decisions
+                </h2>
+
+                <p>
+                    AgriSense can analyze price trends and market
+                    differences to help farmers understand available
+                    selling options.
+                </p>
+
+                <button class="primary-button">
+                    Explore AI Insights →
+                </button>
+
+            </div>
+
+            <div class="insight-box">
+
+                <span>Market Insight</span>
+
+                <h3>
+                    Kumbakonam currently shows a higher
+                    listed Paddy price.
+                </h3>
+
+                <p>
+                    Compare available market prices before
+                    deciding where to sell.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Footer -->
+
+    <footer>
+
+        <div class="footer-logo">
+            🌾 AgriSense
+        </div>
+
+        <p>
+            AI-Powered Multi-Crop Market Intelligence
+            for Tamil Nadu Farmers
+        </p>
+
+        <span>
+            Prototype Sample Data · 2026
+        </span>
+
+    </footer>
+
 
     <script src="script.js"></script>
 
