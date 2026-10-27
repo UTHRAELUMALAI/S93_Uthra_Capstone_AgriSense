@@ -40,6 +40,29 @@ app.get("/api/crop-prices", async (req, res) => {
   }
 });
 
+app.put("/api/crop-prices/:id", async (req, res) => {
+  try {
+    const updatedCropPrice = await CropPrice.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedCropPrice) {
+      return res.status(404).json({
+        message: "Crop price not found",
+      });
+    }
+
+    res.json(updatedCropPrice);
+  } catch (error) {
+    console.error("Failed to update crop price:", error);
+    res.status(500).json({
+      message: "Failed to update crop price",
+    });
+  }
+});
+
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
