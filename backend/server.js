@@ -34,8 +34,9 @@ app.get("/api/crop-prices", async (req, res) => {
 
     res.json(cropPrices);
   } catch (error) {
+    console.error("Failed to fetch crop prices:", error);
     res.status(500).json({
-      message: error.message,
+      message: "Failed to fetch crop prices",
     });
   }
 });
