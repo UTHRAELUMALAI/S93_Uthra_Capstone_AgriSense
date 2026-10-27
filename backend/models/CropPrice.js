@@ -17,6 +17,11 @@ const cropPriceSchema = new mongoose.Schema(
       required: true,
     },
 
+    marketId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Market",
+    },
+
     price: {
       type: Number,
       required: true,
