@@ -20,6 +20,7 @@ app.get("/", (req, res) => {
 // GET - Get all markets
 app.get("/api/markets", async (req, res) => {
   try {
+
     const markets = await Market.find();
 
     res.json(markets);
@@ -101,6 +102,28 @@ app.put("/api/crop-prices/:id", async (req, res) => {
 
     res.status(500).json({
       message: "Failed to update crop price",
+    });
+  }
+});
+
+app.delete("/api/crop-prices/:id", async (req, res) => {
+  try {
+    const deletedCropPrice = await CropPrice.findByIdAndDelete(req.params.id);
+
+    if (!deletedCropPrice) {
+      return res.status(404).json({
+        message: "Crop price not found",
+      });
+    }
+
+    res.json({
+      message: "Crop price deleted successfully",
+      deletedCropPrice,
+    });
+  } catch (error) {
+    console.error("Failed to delete crop price:", error);
+    res.status(500).json({
+      message: "Failed to delete crop price",
     });
   }
 });
