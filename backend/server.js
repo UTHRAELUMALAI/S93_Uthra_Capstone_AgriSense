@@ -79,8 +79,25 @@ app.get("/api/crop-prices", async (req, res) => {
 });
 
 // PUT - Update crop price
+// PUT - Update crop price
 app.put("/api/crop-prices/:id", async (req, res) => {
   try {
+    // Check if marketId is provided
+    if (!req.body.marketId) {
+      return res.status(400).json({
+        message: "marketId is required",
+      });
+    }
+
+    // Check if the referenced market exists
+    const market = await Market.findById(req.body.marketId);
+
+    if (!market) {
+      return res.status(404).json({
+        message: "Referenced market not found",
+      });
+    }
+
     const updatedCropPrice = await CropPrice.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -100,8 +117,8 @@ app.put("/api/crop-prices/:id", async (req, res) => {
   } catch (error) {
     console.error("Failed to update crop price:", error);
 
-    res.status(500).json({
-      message: "Failed to update crop price",
+    res.status(400).json({
+      message: error.message,
     });
   }
 });
