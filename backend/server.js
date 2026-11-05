@@ -9,6 +9,7 @@ const jwt = require("jsonwebtoken");
 const User = require("./models/User");
 const CropPrice = require("./models/CropPrice");
 const Market = require("./models/Market");
+const authMiddleware = require("./middleware/authMiddleware");
 
 const app = express();
 
@@ -66,7 +67,7 @@ app.post("/api/markets", async (req, res) => {
 // =========================
 
 // POST - Add crop price
-app.post("/api/crop-prices", async (req, res) => {
+app.post("/api/crop-prices", authMiddleware, async (req, res) => {
   try {
     const cropPrice = await CropPrice.create(req.body);
 
