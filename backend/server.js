@@ -1,6 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const multer = require("multer");
+const csv = require("csv-parser");
+const { Readable } = require("stream");
+
 require("dotenv").config({ path: __dirname + "/.env" });
 
 const bcrypt = require("bcryptjs");
@@ -16,8 +20,30 @@ const app = express();
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// =========================
+// MIDDLEWARE
+// =========================
+
 app.use(cors());
 app.use(express.json());
+
+// Multer configuration for CSV upload
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+  fileFilter: (req, file, cb) => {
+    if (
+      file.mimetype === "text/csv" ||
+      file.originalname.toLowerCase().endsWith(".csv")
+    ) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only CSV files are allowed"));
+    }
+  },
+});
 
 // =========================
 // ROOT API
@@ -99,7 +125,125 @@ app.get("/api/crop-prices", async (req, res) => {
   }
 });
 
+// =========================
+// CSV FILE UPLOAD
+// =========================
+
+// POST - Upload crop prices using CSV file
+app.post(
+  "/api/crop-prices/upload",
+  authMiddleware,
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          message: "Please upload a CSV file",
+        });
+      }
+
+      const rows = [];
+
+      const stream = Readable.from(req.file.buffer.toString());
+
+      stream
+        .pipe(csv())
+        .on("data", (row) => {
+          rows.push(row);
+        })
+        .on("end", async () => {
+          try {
+            if (rows.length === 0) {
+              return res.status(400).json({
+                message: "CSV file is empty",
+              });
+            }
+
+            const cropPrices = [];
+
+            for (const row of rows) {
+              const crop = row.crop?.trim();
+              const district = row.district?.trim();
+              const market = row.market?.trim();
+              const price = Number(row.price);
+              const unit = row.unit?.trim();
+              const date = new Date(row.date);
+
+              if (
+                !crop ||
+                !district ||
+                !market ||
+                !unit ||
+                Number.isNaN(price) ||
+                Number.isNaN(date.getTime())
+              ) {
+                return res.status(400).json({
+                  message:
+                    "Invalid CSV data. Required columns: crop, district, market, price, unit, date",
+                });
+              }
+
+              const existingMarket = await Market.findOne({
+                name: market,
+                district: district,
+              });
+
+              const cropPriceData = {
+                crop,
+                district,
+                market,
+                price,
+                unit,
+                date,
+              };
+
+              if (existingMarket) {
+                cropPriceData.marketId = existingMarket._id;
+              }
+
+              cropPrices.push(cropPriceData);
+            }
+
+            const savedCropPrices =
+              await CropPrice.insertMany(cropPrices);
+
+            res.status(201).json({
+              message: "CSV file uploaded successfully",
+              recordsUploaded: savedCropPrices.length,
+              data: savedCropPrices,
+            });
+          } catch (error) {
+            console.error("Failed to process CSV:", error);
+
+            res.status(500).json({
+              message: "Failed to process CSV file",
+              error: error.message,
+            });
+          }
+        })
+        .on("error", (error) => {
+          console.error("CSV parsing failed:", error);
+
+          res.status(400).json({
+            message: "Failed to read CSV file",
+            error: error.message,
+          });
+        });
+    } catch (error) {
+      console.error("File upload failed:", error);
+
+      res.status(500).json({
+        message: "File upload failed",
+        error: error.message,
+      });
+    }
+  }
+);
+
+// =========================
 // PUT - Update crop price
+// =========================
+
 app.put("/api/crop-prices/:id", async (req, res) => {
   try {
     if (!req.body.marketId) {
@@ -141,7 +285,10 @@ app.put("/api/crop-prices/:id", async (req, res) => {
   }
 });
 
+// =========================
 // DELETE - Delete crop price
+// =========================
+
 app.delete("/api/crop-prices/:id", async (req, res) => {
   try {
     const deletedCropPrice = await CropPrice.findByIdAndDelete(
@@ -288,7 +435,6 @@ app.post("/api/auth/google", async (req, res) => {
       });
     }
 
-    // Verify Google ID token
     const ticket = await googleClient.verifyIdToken({
       idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -306,15 +452,12 @@ app.post("/api/auth/google", async (req, res) => {
       });
     }
 
-    // Check if Google account already exists
     let user = await User.findOne({ googleId });
 
-    // If not, check whether the email already exists
     if (!user) {
       user = await User.findOne({ email });
     }
 
-    // Create new Google user
     if (!user) {
       user = await User.create({
         username: email,
@@ -323,7 +466,6 @@ app.post("/api/auth/google", async (req, res) => {
         googleId: googleId,
       });
     } else {
-      // Link Google account to existing user
       user.googleId = googleId;
 
       if (!user.email) {
@@ -337,7 +479,6 @@ app.post("/api/auth/google", async (req, res) => {
       await user.save();
     }
 
-    // Create our own JWT
     const token = jwt.sign(
       {
         userId: user._id,
@@ -378,9 +519,15 @@ mongoose
   .then(() => {
     console.log("MongoDB connected successfully");
 
-    app.listen(5000, () => {
-      console.log("Server running on port 5000");
-    });
+    app
+      .listen(5000, "127.0.0.1", () => {
+        console.log(
+          "Server running on http://127.0.0.1:5000"
+        );
+      })
+      .on("error", (error) => {
+        console.error("SERVER ERROR:", error);
+      });
   })
   .catch((error) => {
     console.log(

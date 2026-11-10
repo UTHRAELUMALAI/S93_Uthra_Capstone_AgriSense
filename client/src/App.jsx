@@ -1,6 +1,7 @@
 import Navbar from "./components/Navbar";
 import CropCard from "./components/CropCard";
 import MarketInfo from "./components/MarketInfo";
+import FileUpload from "./components/FileUpload";
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
         district="Thanjavur"
         price="2500"
       />
+
+      <FileUpload />
     </>
   );
 }
