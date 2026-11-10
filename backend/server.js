@@ -5,6 +5,7 @@ require("dotenv").config({ path: __dirname + "/.env" });
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 
 const User = require("./models/User");
 const CropPrice = require("./models/CropPrice");
@@ -12,6 +13,8 @@ const Market = require("./models/Market");
 const authMiddleware = require("./middleware/authMiddleware");
 
 const app = express();
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 app.use(cors());
 app.use(express.json());
@@ -99,14 +102,12 @@ app.get("/api/crop-prices", async (req, res) => {
 // PUT - Update crop price
 app.put("/api/crop-prices/:id", async (req, res) => {
   try {
-    // Check if marketId is provided
     if (!req.body.marketId) {
       return res.status(400).json({
         message: "marketId is required",
       });
     }
 
-    // Check if the referenced market exists
     const market = await Market.findById(req.body.marketId);
 
     if (!market) {
@@ -175,14 +176,12 @@ app.post("/api/auth/register", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Check username and password
     if (!username || !password) {
       return res.status(400).json({
         message: "Username and password are required",
       });
     }
 
-    // Check if username already exists
     const existingUser = await User.findOne({ username });
 
     if (existingUser) {
@@ -191,10 +190,8 @@ app.post("/api/auth/register", async (req, res) => {
       });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
     const user = await User.create({
       username,
       password: hashedPassword,
@@ -220,14 +217,12 @@ app.post("/api/auth/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Check username and password
     if (!username || !password) {
       return res.status(400).json({
         message: "Username and password are required",
       });
     }
 
-    // Find user
     const user = await User.findOne({ username });
 
     if (!user) {
@@ -236,7 +231,12 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
-    // Compare password with hashed password
+    if (!user.password) {
+      return res.status(401).json({
+        message: "This account uses Google login",
+      });
+    }
+
     const passwordMatch = await bcrypt.compare(
       password,
       user.password
@@ -248,7 +248,6 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
-    // Create JWT token
     const token = jwt.sign(
       {
         userId: user._id,
@@ -269,6 +268,102 @@ app.post("/api/auth/login", async (req, res) => {
 
     res.status(500).json({
       message: "Login failed",
+      error: error.message,
+    });
+  }
+});
+
+// =========================
+// GOOGLE AUTHENTICATION
+// =========================
+
+// POST - Google Login
+app.post("/api/auth/google", async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({
+        message: "Google credential is required",
+      });
+    }
+
+    // Verify Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const googleId = payload.sub;
+    const email = payload.email;
+    const name = payload.name;
+
+    if (!googleId || !email) {
+      return res.status(400).json({
+        message: "Invalid Google account information",
+      });
+    }
+
+    // Check if Google account already exists
+    let user = await User.findOne({ googleId });
+
+    // If not, check whether the email already exists
+    if (!user) {
+      user = await User.findOne({ email });
+    }
+
+    // Create new Google user
+    if (!user) {
+      user = await User.create({
+        username: email,
+        email: email,
+        name: name || email,
+        googleId: googleId,
+      });
+    } else {
+      // Link Google account to existing user
+      user.googleId = googleId;
+
+      if (!user.email) {
+        user.email = email;
+      }
+
+      if (!user.name) {
+        user.name = name || email;
+      }
+
+      await user.save();
+    }
+
+    // Create our own JWT
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        username: user.username,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
+
+    res.json({
+      message: "Google login successful",
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        name: user.name,
+      },
+    });
+  } catch (error) {
+    console.error("Google login failed:", error);
+
+    res.status(401).json({
+      message: "Google authentication failed",
       error: error.message,
     });
   }
